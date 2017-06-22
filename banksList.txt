@@ -1,0 +1,48 @@
+"African Bank Ltd" www.africanbank.co.za
+"BoE Private Clients (a division of Nedbank)" www.boeprivateclients.co.za
+"Bidvest Bank Limited" www.bidvest.co.za
+"Capitec Bank Ltd" www.capitecbank.co.za
+"Fairbairn Private Bank (a division of Nedbank)" www.fairbairnpb.com
+"FirstRand Bank Ltd" www.firstrand.co.za
+"First National Bank (a division of FirstRand Bank)" www.fnb.co.za
+"Imperial Bank Ltd (a subsidiary of the Nedbank Group)" www.imperialbank.co.za
+"Investec Bank Ltd" www.investec.com
+"Marriott Corporate Property Bank Ltd. (a subsidiary of Marriott Holdings Ltd.)" www.marriott.co.za
+"MEEG Bank Ltd" www.meegbank.co.za
+"Nedbank Group Ltd" www.nedbankgroup.com
+"Nedbank (a division of the Nedbank Group)" www.nedbankgroup.com
+"Old Mutual Bank (a division of Nedbank)" www.oldmutual.co.za/ombank
+"Go Banking (a division of Nedbank in association with Pick 'n Pay)" www.gobanking.co.za
+"Rand Merchant Bank (a division of FirstRand Bank)" www.rmb.co.za
+"Rennies Bank Ltd (now a division of Bidvest Bank)" www.bidvest.co.za
+"RMB Private Bank (a division of FirstRand Bank)" www.rmbprivatebank.co.za
+"Sasfin Bank Ltd" www.sasfin.co.za
+"Standard Bank of SA Ltd, The" www.standardbank.co.za
+"TEBA Bank Ltd" www.tebabank.co.za
+"Wesbank (a division of FirstRand Bank)" www.wesbank.co.za
+"Absa Bank Ltd (a member of Barclays Bank Group)" www.absa.co.za
+"Albaraka Bank Limited" www.albaraka.co.za
+"Habib Overseas Bank Limited" www.habibbank.com
+"HBZ Bank Limited (a subsidiary of  Habib Bank)" www.hbzbank.co.za
+"Mercantile Bank Limited" www.mercantile.co.za
+"South African Bank of Athens Limited, The" www.bankofathens.co.za
+"ABN AMRO Bank N.V." www.abnamro.com
+"Bank of Baroda" www.bankofbaroda.com
+"Bank of China, Johannesburg Branch" www.bank-of-china.com
+"Bank of Taiwan, SA Branch" www.bot.com.tw/english
+"Barclays Bank plc (now incorporated into Absa Bank)" www.barclays.com
+"Calyon Corporate and Investment Bank SA" www.calyon.com
+"China Construction Bank, Johannesburg Branch" www.ccbjhb.com
+"Citibank N.A." www.citibank.co.za
+"Commerzbank Aktiengesellschaft" www.commerzbank.com
+"Deutsche Bank AG" www.db.com
+"HSBC Bank plc, Johannesburg Branch" www.hsbc.com
+"JPMorgan Chase Bank, N.A., Johannesburg Branch" www.jpmorgan.com
+"Société Générale, Johannesburg Branch" www.socgen.com
+"Standard Chartered Bank, Johannesburg Branch" www.standardchartered.com
+"State Bank of India" www.statebank.co.za
+"GBS Mutual Bank" www.gbsbank.co.za
+"VBS Mutual Bank" www.vbsmutualbank.co.za
+"Development Bank of Southern Africa" www.dbsa.org
+"Land and Agricultural Development Bank of South Africa" www.landbank.co.za
+"Postbank" www.sapo.co.za
