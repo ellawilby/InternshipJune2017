@@ -1,0 +1,25 @@
+README DomainSPF.py
+
+A tweaked version that provides some visual feedback when processing a large list
+Changes DNS handling a little better to differentiate between no records returned, a timeout quering servers and a NX domain response
+
+STATUS:
++ SPF record found
+- No TXT record found
+t Timout reaching listed Nameservers
+x No such domain
+
+Example output
+Starting  to process SPF data for domains in  banksList.txt
+--+ttt----tt----+-------t+ttt--+---+-+--+----t----------+-t--t----+----+++-t--tt--+---+-t+--t-----+-tx---++++--+-+--++t----t---x-----+-tt--t+-+----+--+-++-t+---+------x-+--+++++x--+-++++-+++++++--++-++--+-----++--+t-t-+--+---t-+-+t++---+++++----++-------++++---+--++----+--+--+---++---+-------++--+-+-++---t--+-+-+-+-+---+x-++-+--+tx++-++++++----+------++------------++-+--+-x----+-+++x-+t+t+-+-+--+-x+--+-++-+-++++--+x++--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx---xtt--t-t--ttt-----xtt----t---ttt-t-t---t-t-xx-xxt---tttt----xx--xx-tttt--------tt-t----ttttt---ttttxxxx--t----tt-ttttt---+++----ttt--tt-tttt------xx--tt-tt--++--t-ttt-----ttxxxxxx-xxxx--t--tt-tttt-t-xx--tt--xx-tt-----xxxxttxxxx--xx---xxxx-t--tt-----tttt-xxxxxxtt----ttt---ttxx--xx----tt++
+Processed 51575 domains with  4975 having SPF records
+
+TODO:
+  - command line option parsing
+  - collects stats on timeouts and NX
+  - write timeouts to a lamelist for trying at a later stage
+  - allow a specific DNS server to be used ( allow for better caching)
+  -  pre-read file to show proper progress %
+
+Last update: 2017/07/26
+ 
