@@ -1,5 +1,10 @@
 README zone_parser2.py zone_insert2.py fill_details.py queries.py
 
+TODO:
+-bind.sql
+-drop.sql
+-Error log files
+
 1) zone_parser2.py
 
 Required libraries:
