@@ -5,7 +5,7 @@ import os
 from zone_insert2 import insert
 
 ####Change as required####
-acceptableRRTypes=['NS','A','AAAA']
+acceptableRRTypes=['NS','A','AAAA', 'CNAME', 'HINFO', 'MX', 'PTR', 'SPF', 'SRV', 'TXT', 'XFR']
 zoneFile=open(sys.argv[1], "r")
 outputFile=open("netOutput.txt", "w")
 logFile=open("netLogFile.txt", "w")
@@ -28,9 +28,6 @@ for rr in zoneFile:
 	#Ignore empty lines
 	if len(rr)==0:
 		continue
-	#Header lines
-	if rr[0]==';':
-		continue #Ignore for now
 	#Line defining origin
 	if parts[0]=="$ORIGIN":
 		ORIGIN=parts[1][0:len(parts[1])-1]
@@ -96,19 +93,34 @@ for rr in zoneFile:
 	except Exception:
 		print "Something broke... oh dear!"
 		continue
-	num=len(parts)
+
+	#Header lines
+	if rr[0]==';':
+		continue #Ignore for now
 	try:
-		if ' '.join(parts).find(".GTLD-SERVERS")==-1 and (len(parts)>1 and acceptableRRTypes.index(parts[len(parts)-2])!=-1): #Only includes acceptable types and ignore entries for gtld-servers
-			if num==4: #If TTL not specified it is the last defined global TTL
+		validType=False
+		for RRtype in acceptableRRTypes:
+			if rr.find(' '+RRtype+' ')!=-1:
+				validType=True
+				break
+		if (rr.find(".GTLD-SERVERS")==-1 and parts[0]!=ORIGIN) and validType: #Only includes acceptable types and ignore entries for gtld-servers
+			try: #If TTL not specified it is the last defined global TTL
 				TTL=int(parts[1])
-			else:
+				num=2
+			except ValueError:
 				TTL=globalTTL
+				num=1
 			RECORD_NAME=parts[0]
-			RECORD_TYPE=parts[num-2]
-			if parts[num-1][len(parts[num-1])-2]=='.': #Fully qualified domain name
-				RECORD_DATA=parts[num-1][0:len(parts[num-1])-1]#Should I remove the trailing dot??
+			RECORD_TYPE=parts[num]
+			if RECORD_TYPE=='NS' and parts[-1][-2]=='.': #Fully qualified domain name
+				RECORD_DATA=parts[-1][0:len(parts[-1])-1]#Should I remove the trailing dot??
+			elif RECORD_TYPE=='NS':
+				RECORD_DATA=parts[-1][0:len(parts[-1])-1]+"."+ORIGIN
 			else:
-				RECORD_DATA=parts[num-1][0:len(parts[num-1])-1]+"."+ORIGIN
+				RECORD_DATA=""
+				for i in range(num+1,len(parts)):
+					RECORD_DATA=RECORD_DATA+' '+parts[i]
+				RECORD_DATA=RECORD_DATA[1:len(RECORD_DATA)-1]
 			if OUT_TO_FILE==True:
 				outputFile.write("RN: "+RECORD_NAME+", TTL: "+str(TTL)+", RT: "+RECORD_TYPE+", RD: "+RECORD_DATA+"\n")
 			rrList.append([RECORD_NAME, TTL, RECORD_TYPE, RECORD_DATA])
