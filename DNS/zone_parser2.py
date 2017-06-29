@@ -1,13 +1,15 @@
 #!/usr/bin/python
 
 import sys
-import psycopg2
 import os
 from zone_insert2 import insert
 
+####Change as required####
+acceptableRRTypes=['NS','A','AAAA']
 zoneFile=open(sys.argv[1], "r")
 outputFile=open("netOutput.txt", "w")
 logFile=open("netLogFile.txt", "w")
+
 ORIGIN=""
 TTL=0
 globalTTL=0
@@ -15,8 +17,9 @@ inSOA=0 #0=not in SOA, 1=in SOA, 2=read SOA into 1 line
 cnt=0
 SOAline=""
 rrList=[]
-acceptableRRTypes=['NS','A','AAAA']
 OUT_TO_FILE=True
+
+print "Parsing lines from", sys.argv[1]
 
 for rr in zoneFile:
 	#Splitting and cleaning line	
@@ -86,7 +89,7 @@ for rr in zoneFile:
 			MIN=parts[pos+9]
 			if parts[pos+10]!=')':
 				raise Exception('Something hit the fan!')
-			print "NAME: "+NAME+", TTL:"+str(TTL)+", CLASS:"+CLASS+", NAMESERV:"+NAMESERVER+", ADMIN EMAIL:"+ADMIN_EMAIL+", SERIAL:"+SERIAL+", REFRESH:"+REFRESH+", RETRY:"+RETRY+", EXPIRY:"+EXPIRY+", MIN:"+MIN
+			#print "NAME: "+NAME+", TTL:"+str(TTL)+", CLASS:"+CLASS+", NAMESERV:"+NAMESERVER+", ADMIN EMAIL:"+ADMIN_EMAIL+", SERIAL:"+SERIAL+", REFRESH:"+REFRESH+", RETRY:"+RETRY+", EXPIRY:"+EXPIRY+", MIN:"+MIN
 			rrList.append([NAME, TTL, CLASS, NAMESERVER, ADMIN_EMAIL, SERIAL, int(REFRESH), int(RETRY), int(EXPIRY), int(MIN)])
 			inSOA=0 #So this if won't be executed again
 			continue
@@ -106,8 +109,6 @@ for rr in zoneFile:
 				RECORD_DATA=parts[num-1][0:len(parts[num-1])-1]#Should I remove the trailing dot??
 			else:
 				RECORD_DATA=parts[num-1][0:len(parts[num-1])-1]+"."+ORIGIN
-				#print RECORD_DATA
-			#INSERT INTO TABLE HERE
 			if OUT_TO_FILE==True:
 				outputFile.write("RN: "+RECORD_NAME+", TTL: "+str(TTL)+", RT: "+RECORD_TYPE+", RD: "+RECORD_DATA+"\n")
 			rrList.append([RECORD_NAME, TTL, RECORD_TYPE, RECORD_DATA])

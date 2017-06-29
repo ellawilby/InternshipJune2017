@@ -1,0 +1,117 @@
+README zone_parser2.py zone_insert2.py fill_details.py queries.py
+
+1) zone_parser2.py
+
+Required libraries:
+os
+sys
+
+In file variables to change:
+List of acceptable RR types.
+Changing this may require alterations to the database and zone_insert2.py to handle additional cases.
+
+Required input:
+zone file
+
+Eg.	>>./zone_parser2.py net
+
+Must also be in the same directory as zone_parser2.py
+
+Reads in a zone file and parses contents. 
+If something breaks this will probably be what went wrong.
+Calls zone_insert2.py and passes it a list of all the resource records as tuples
+
+2) zone_insert2.py
+
+Required libraries:
+psychopg2
+sys
+
+In file variables to change:
+Database details
+
+Required input:
+List of resource records as tuples.
+The SOA record should be at index 0.
+
+Eg.	>>from zone_insert2 import insert
+	>>insert(rrList)
+
+Reads in a list of resource records and inserts them into the appropriate table in the database.
+This script is called by zone_parser2.py and therefore does not need to be called explicitely.
+
+output STATUS:
+s SOA record for this zone inserted into soa table
+S SOA record for this zone already in database. Details updated
+n NS record inserted into ns table
+a A record inserted into a table
+A AAAA record inserted into aaaa table
+
+3) fill_details.py
+
+Required Libraries:
+psycopg2
+sys
+dns.resolver
+socket
+pyasn
+geolite2 from geoip
+
+pyasn:
+>>pip install pyasn --pre
+>>cd ~/.local/bin 	#### or wherever the .bz2 file was saved
+>>./pyasn_util_download.py --latest
+>>./pyasn_util_convert.py --single <Downloaded RIB File> <appropriate directory>/ip2asn.bz2
+
+geolite2:
+>>pip install python-geoip
+>>pip install python-geoip-geolite2
+
+In file variables to change:
+Database details
+
+Required input:
+None
+
+Eg.	>>./fill_details.py
+
+Creates A records for all domains listed in the ns table but not yet listed in the a table.
+Fills in AS numbers and Countries for all not yet filled in.
+
+output STATUS:
+processing addresses:
++ A record found
+- No TXT record found
+t Timout reaching listed Nameservers
+x No such domain
+processing asn and country:
+a AS number found
+x No AS number found
+c Country found
+X No country found
+
+4) queries.py
+
+Required Libraries:
+psycopg2
+sys
+dns.resolver
+socket
+os
+
+In file variables to change:
+Database details
+Number of top records to return for each query
+Netmask length
+
+Required input:
+None
+
+Eg.	>>./queries.py
+
+Executes each query and returns a list of the top results in a descending order.
+Queries:
+1- Top N most common NS domains
+2- Top N most common IP addresses with the supplied netmask applied (netmasklen=32 for actual IP addressses)
+3- Top N most common AS numbers
+4- Top N most common countries
