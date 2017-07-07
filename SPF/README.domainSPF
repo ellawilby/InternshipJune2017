@@ -1,5 +1,12 @@
 README DomainSPF.py
 
+Performs SPF queries on a list of domains specified as a command line argument.
+Then calls clean() in cleanIncludes2.py which resolves all domain names returned by the SPF queries.
+Output: A text file containing all the IP addressses for the SPFrecords for the given domain.
+	A text file containing all the DMARC records for the domains given.
+	A text file containing all the output, including the domains for which there was no SPF record, domains that no longer exist and those that timed out.
+	A text file containing only the domains that timed out so that this file can be rerun with a longer timeout period (lame list).
+
 A tweaked version that provides some visual feedback when processing a large list
 Changes DNS handling a little better to differentiate between no records returned, a timeout quering servers and a NX domain response
 
@@ -15,11 +22,9 @@ Starting  to process SPF data for domains in  banksList.txt
 Processed 51575 domains with  4975 having SPF records
 
 TODO:
-  - command line option parsing
   - collects stats on timeouts and NX
   - write timeouts to a lamelist for trying at a later stage
   - allow a specific DNS server to be used ( allow for better caching)
   -  pre-read file to show proper progress %
 
 Last update: 2017/07/26
- 
