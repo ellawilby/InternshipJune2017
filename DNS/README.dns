@@ -1,63 +1,245 @@
-README zone_parser2.py zone_insert2.py fill_details.py queries.py
+README for DNS project
+Ella Wilby June/July 2017
 
-TODO:
--bind.sql
--drop.sql
--Error log files
+Overview:
+This project aims to parse the contents of a zone file into a database for the purposes of further analysis.
+All parsing and importing can be done by running the script zone_parser2.py with the name of the zone file to be analysed as a command line argument.
+All further functions are called from within zone_parser2.py or their own wrappers except the scripts for basic data analysis.
+The scripts for basic data analysis are queries_ns.py, queries_ip.py, queries_asn.py and queries_country.py. These can all be run once the database is successfully populated.
+
+More information about the functions used:
 
 1) zone_parser2.py
 
 Required libraries:
 os
 sys
+parseSOA from zone_parser2_soa.py
+parseAcceptable from zone_parser2_acceptableTypes.py
+splitNS from zone_parser2_ns.py
 
 In file variables to change:
-List of acceptable RR types.
-Changing this may require alterations to the database and zone_insert2.py to handle additional cases.
+-List of acceptable RR types. (Changing this may require alterations to the database and 
+ zone_insert2.py to handle additional cases.)
+-Database details
+-AS numbers database name (.bz2 file)
+-File names for txt files containing the create and drop postgresql statements for the database
 
 Required input:
-zone file
+zone file name
 
 Eg.	>>./zone_parser2.py net
 
-Must also be in the same directory as zone_parser2.py
+Must also be in the same directory:
+- The zone file specified
+- zone_parser2_soa.py
+- zone_parser2_acceptableTypes.py
+- zone_parser2_ns.py
+- zone_insert2.py
+- fill_details2.py
+- resolveArecords.py
 
-Reads in a zone file and parses contents. 
-If something breaks this will probably be what went wrong.
-Calls zone_insert2.py and passes it a list of all the resource records as tuples
+zone_parser2.py acts as the control flow for this project.
+First it reads in a zone file and call the appropriate function (from zone_parser2_soa.py, zone_parser2_acceptableTypes.py and zone_parser2_ns.py) which parses contents. 
+Then it inserts the resource records parsed by these functions into the database by calling the insert function from zone_insert2.py
+If 'NS' is in the list of acceptable resource record then the resolveA function from resolveArecords.py is called to resolve the A records for the DNS hosts for which there is no glue record (Mostly those not in the .net zone)
 
-2) zone_insert2.py
+2) zone_parser2_soa.py
 
 Required libraries:
-psychopg2
 sys
+os
+insert from zone_insert2.py
 
 In file variables to change:
-Database details
+None
 
-Required input:
-List of resource records as tuples.
-The SOA record should be at index 0.
+Fuctions:
+-parseSOA(zoneFileName)
+	-Parses the soa resource record in the supplied zone file. 
+	-Calls insert(rrList) with a list containing the soa record to be inserted into the database.
 
-Eg.	>>from zone_insert2 import insert
-	>>insert(rrList)
+parseSOA() is called from within the zone_parser2.py script
 
-Reads in a list of resource records and inserts them into the appropriate table in the database.
-This script is called by zone_parser2.py and therefore does not need to be called explicitely.
+3) zone_parser2_acceptableTypes.py
+
+Required libraries:
+sys
+os
+insert from zone_insert2 
+
+Fuctions:
+-parseAcceptable(zoneFileName, acceptableRRTypes, globalZONE, globalTTL)
+	-Accepts the name of the zone file, a list off acceptable resouce record types and the zone 
+	 and default TTL for this zone file
+	-Parses the acceptable resource records in the supplied zone file. 
+	-Calls insert(rrList) with a list containing the resource records to be inserted into the
+	 database.
+
+parseAcceptable() is called from within the zone_parser2.py script
+
+4) zone_parser2_ns.py
+
+Required libraries:
+sys
+os
+insert from zone_insert2 
+fill from fill_details2
+
+Fuctions:
+-parseNS(zoneFileName, globalZONE, globalTTL)
+	-Accepts the name of the zone file, the zone 
+	 and default TTL for this zone file
+	-Parses the NS resource records in the supplied zone file. 
+	-Calls insert(rrList) with a list containing the resource records to be inserted into the
+	 database.
+	-Calls fill() to resolve IP addresses for the NS domain names
+
+parseNS() is called from within the zone_parser2.py script if the list of acceptable types contains 'NS'
+
+5) zone_insert2.py
+
+Required libraries:
+psycopg2
+sys
+os
+dns.resolver
+
+Functions:
+-insert(rrList, globalZONE)
+	-Accepts list of resource records as lists.
+	-The SOA record should be at index 0 if it is in the resource list.
+	-If there is an SOA record it will call checkIfSOAExists() which returns True/False,
+	 indicating whether of not to stop inserting.
+	-If checkIfSOAExists() returns False then it will call insertSOA() and insertRR()
+-checkIfSOAExists(soa, bindFileName, dropFileName, conn)
+	-Accepts the soa resource record as a list, file names for the bind and drop files which
+	 contain postgresql statements for creating and deleting the database and conn which is a
+	 connection to the database.
+	-Checks if there is already a record in the soa table for the zone about to be inserted.
+	-If there is a record for this zone then it will ask whether to scrub the database.
+	-If the deleting and recreating of the database fails then checkIfSOAExists will return true
+	 indicating for the insertion to stop. Otherwise it will return False, insicating for the
+	 insertion to not stop.
+-insertSOA(soa, conn)
+	-Accepts the soa resource record as a list and conn which is a connection to the database.
+	-Inserts the soa record for this zone into the soa table in the database
+-insertRR(rrList, conn)
+	-Accepts a list of resource records as lists and conn which is a connection to the database.
+	-Inserts the resource records into the appropriate tables in the database.
 
 output STATUS:
 s SOA record for this zone inserted into soa table
-S SOA record for this zone already in database. Details updated
 n NS record inserted into ns table
 a A record inserted into a table
 A AAAA record inserted into aaaa table
+c CNAME record inserted into cname table
+h HINFO record inserted into hinfo table
+m MX record inserted into mx table
+p PTR record inserted into ptr table
+S SPF record inserted into spf table
+v SRV record inserted into srv table
+x XFR record inserted into xfr table
+- Unrecognised resource record or failed insertion
 
-3) fill_details.py
+insert() is called from within zone_parser2.py and insert() in turn calls checkIfSOAExists(), insertSOA() and insertRR()
+
+6) listNS.py
+
+Required libraries:
+psycopg2
+os
+sys
+
+Functions:
+-constructAList(connStr, aFileName)
+	-Accepts a name for the file in which to write the list of A records and connStr which is a 
+	 string describing the connection to the database.
+	-Constructs a list of all the unique hosts in the ns table for which there is no glue record 
+	 in the a table. Writes this list to a file.
+	-Calls FastA.py and parses it the name of the file containing the list of hosts and the name  
+	 of an output file.
+-constructAAAAList(connStr, aaaaFileName)
+	-Accepts a name for the file in which to write the list of AAAA records and connStr which is 
+	 a string describing the connection to the database.
+	-Constructs a list of all the unique hosts in the ns table for which there is no glue record 
+	 in the aaaa table. Writes this list to a file.
+	-Calls Fast6.py and parses it the name of the file containing the list of hosts and the name  
+	 of an output file.
+
+7) FastA.py
+
+Written by Prof. Barry Irwin
+
+Accepts the names of an input and an output file as command line arguments.
+The input file must contain a list of hosts written one per line.
+FastA.py asyncronously resolves the IPv4 addresses for the hosts and writes these to the output file in a csv format with one host per line as the first element and followed by a list of its IP addresses.
+FastA.py also writes out a list of the timeouts, nx and errors found while resolving the IPs.
+The hosts listed in the timeout file can be rerun through this script after increasing the timeout specified in order to get more results.
+
+8) Fast6.py
+
+Written by Prof. Barry Irwin
+
+Accepts the names of an input and an output file as command line arguments.
+The input file must contain a list of hosts written one per line.
+Fast6.py asyncronously resolves the IPv6 addresses for the hosts and writes these to the output file in a csv format with one host per line as the first element and followed by a list of its IP addresses.
+Fast6.py also writes out a list of the timeouts, nx and errors found while resolving the IPs.
+The hosts listed in the timeout file can be rerun through this script after increasing the timeout specified in order to get more results.
+
+9) clean_NS.py
+
+This script is not included in the overall control flow. It was used to merge two output files from FastA.py because of a weird issue where when run from within the Rhodes network lots of hosts resolved to the same IPv4 address (200.58.119.215) but when run from outside the Rhodes network this did not occur.
+It is suspected that this occured because of the Rhodes firewall or proxy settings.
+
+Input:
+>>./clean_NS <output of FastA.py when run from within Rhodes> <output of FastA.py when run from outside Rhodes> <output file name> <repeated IP address>
+
+10) insert_NS.py
+
+Required Libraries:
+sys
+os
+psycopg2
+
+Functions:
+-insertA(connStr, inFileName)
+	-Accepts a name for the file from which to read the list of A records and connStr which is a 
+	 string describing the connection to the database.
+	-Inserts a record into the a table for each host and IPv4 listed (ie if one host has 3 IP 
+	 addresses listed it will have 3 records in the a table)
+	-Output:
+		+ record inserted successfully
+		- record inserted unsuccessfully
+-insertAAAA(connStr, inFileName)
+	-Accepts a name for the file from which to read the list of AAAA records and connStr which is 
+	 a string describing the connection to the database.
+	-Inserts a record into the aaaa table for each host and IPv6 listed (ie if one host has 3 IP 
+	 addresses listed it will have 3 records in the aaaa table)
+	-Output:
+		+ record inserted successfully
+		- record inserted unsuccessfully
+
+11)resolveASN_country.py
+
+Required Libraries:
+addASNandCountry from fillAtable.py
+sys
+pyasn
+
+Functions:
+-resolveASN_Country(connStr, asndbName)
+	-Accepts a name for the database from which to resolve the AS numbers for IP addresses and 
+	 connStr which is a string describing the connection to the database.
+	-Selects subsets of the a table and calls addASNandCountry() which resolves their AS numbers 
+	 and countries. Continuously does this until all records without either an AS number or 
+ 	 country have been attepted to be resolved.
+
+12) fillAtable.py
 
 Required Libraries:
 psycopg2
 sys
-dns.resolver
 socket
 pyasn
 geolite2 from geoip
@@ -72,51 +254,75 @@ geolite2:
 >>pip install python-geoip
 >>pip install python-geoip-geolite2
 
-In file variables to change:
-Database details
+Functions:
+-addASNandCountry(asndb, connectionString, letter)
+	-Accepts a name for the database from which to resolve the AS numbers for IP addresses, 
+	 connStr which is a string describing the connection to the database and letter which is the 
+	 string indicating the subsection on which to try and resolve AS number and countries.
+	-Selects all records in the a table which have a host name starting with the string provided 
+	 and which don't have either the ASN, country or both.
+	-Updates the records for which AS numbers or counties were successfully resolved
+	-This function is called from the resolveASN_Country function which acts as its wrapper
 
-Required input:
-None
 
-Eg.	>>./fill_details.py
+NOTE: The following can be run to help analyse the data in the database once it has been fully populated.
 
-Creates A records for all domains listed in the ns table but not yet listed in the a table.
-Fills in AS numbers and Countries for all not yet filled in.
-
-output STATUS:
-processing addresses:
-+ A record found
-- No TXT record found
-t Timout reaching listed Nameservers
-x No such domain
-processing asn and country:
-a AS number found
-x No AS number found
-c Country found
-X No country found
-
-4) queries.py
+13) queries_ns.py
 
 Required Libraries:
 psycopg2
 sys
-dns.resolver
-socket
 os
 
 In file variables to change:
 Database details
-Number of top records to return for each query
-Netmask length
 
-Required input:
-None
+Command line arguments:
+>> ./queries_ns.py <topN>
+	-topN: The number of record to return in descending order of occurance of that domain name
 
-Eg.	>>./queries.py
+14) queries_ip.py
 
-Executes each query and returns a list of the top results in a descending order.
-Queries:
-1- Top N most common NS domains
-2- Top N most common IP addresses with the supplied netmask applied (netmasklen=32 for actual IP addressses)
-3- Top N most common AS numbers
-4- Top N most common countries
+Required Libraries:
+psycopg2
+sys
+os
+
+In file variables to change:
+Database details
+
+Command line arguments:
+>> ./queries_ip.py <topN> <netmaskLen>
+	-topN: The number of record to return in descending order of occurance of that IP address
+	-netmaskLen: The length of the netmask to apply to the IP addresses before counting how often 
+	 they occur
+
+15) queries_country.py
+
+Required Libraries:
+psycopg2
+sys
+os
+
+In file variables to change:
+Database details
+
+Command line arguments:
+>> ./queries_country.py <topN>
+	-topN: The number of record to return in descending order of occurance of that country
+
+16) queries_asn.py
+
+Required Libraries:
+psycopg2
+sys
+os
+
+In file variables to change:
+Database details
+
+Command line arguments:
+>> ./queries_asn.py <topN>
+	-topN: The number of record to return in descending order of occurance of that AS number
+
+
